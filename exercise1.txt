@@ -1,0 +1,124 @@
+1)
+
+My understanding of the question is the following :
+
+We receive a Datastream from the Gateway, with the position of each person on the field in real time, including the referee and potential fans storming onto the field, we also receive the position of the ball in real time, the stadium is treated as a three dimensionnal plane.
+
+
+The information I would store for each player, the referees, and for the ball would be 
+-An ID
+-The tri-dimensionnal position of each of them
+-Their names
+-Their role (Player team A, Player team B, Ball, Referee)
+-The 
+
+there are a few condition to pause the match, the recording could be stopped during thoses pause phases.
+Unless the conditions are met, we should continue to track everything.
+Player injuries, Goal, Ball Outside of the boundaries, foul play [...]
+
+
+There is still a margin for error, (10cm If I recall correctly)
+I guess there would be some degree of certitude about the position of everything in the stadium.
+
+Also the data is refreshed at a rate of 25hz or 29.997hz, in the video game industry the standard is 64tics with newer releases their servers are 128tics
+meaning that the data flow is not 100% accurate, and the position is approximated during the time frame between tics.
+
+The tracking system can also lose track of one or multiple players / inverting their numbers and someone in the stadium can adjust manually the tracker.
+
+With all of that information, I would start by setting up a MongoDB database, MongoDB was designed to handle tremendous amount of data, and there will be a lot of data with a system like Tracab.
+Pairing MongoDB with Redis will also improve the performances tremendously for read write operation, Caching the data would allow for almost real time communication.
+
+The Collections could be Users, Matches, Teams 
+
+Users : Would contain the :
+identication data for our users,
+the amount of data requested,
+the number of request
+
+
+Matches : This collection would contain all of the Matches separated in documents for each match.
+we could also add the statistic here.
+
+The fields on here would mostly depend on the requirements,
+
+We could have the:
+current roster at any given time for each team,
+the players on the bench ready to sub in,
+the referees, 
+the field on which they are playing on,
+the meteorologic conditions,
+the score
+
+
+
+
+Teams : Having a team collection seems like a potentially good idea, Like that we could centralize the information for each player. it could be usefull for betting website, statistical analysis, and for coaching purposes.
+
+for the fields here we could have :
+the amount of red / yellow card received per season, per match
+the winrate
+the number of game played
+the amount of goals per season
+the amount of player injuries
+the score per player
+
+
+
+I would then setup a Websocket connection from the gateway to our server, 
+on the server i would then create the statistical analysis required, 
+(
+Would need more details in order to create an implementation plan, 
+but on a purely hypothetical stand point let's say we would need :
+
+the amount of time each player got the ball, the number of ball passes per player (successfull / intercepted)
+when the ball would be further away from a player than x meters (I don't possess the technical knowledge on the distance, but would discuss this information with colleagues on my team) we could measure the time between each ticks to see if the player is still in possession of the ball.
+
+if the ball is further away than this distance or if someone else is closer to the ball we could consider that the player passed the ball to someone else, if they are both in the same team, we could consider that it was a successfull pass, otherwise it would have been intercepted
+
+the amount of time each team was in some part of the field (Offensive / defensive), this for example could be measured by the position of the ball on the field and which team is currently having the ball.
+if we are on the team1 side of the field (where their goal is located) and they old the ball we can assume they are defending, (with the addition of zone on the field for example this could be made even more precise)
+
+)
+
+then this processed data could be added to the right database collection and fields.
+
+
+depending on how the differents clients would want to exploit the data, we could either serve it with a rest api, 
+
+
+The challenges :
+
+We need to have a flawless uptime, we can see how big company sudden downtown (Facebook on the  4th of October 2021 for example) caused a massive drop in the share price of the company. --> S3, careful review
+We would encouter a lot of request so scalability is needed. --> Docker, MongoDB, Redis, Cloud computing
+The communication needs to be as fast as possible, since the matches are fast paced, and a lot can happen in a short time --> redis will help with the caching and write read operations
+The security needs to be flawless as well, if there is a breach, hackers will find it --> Social Engineering (needs to educate teams), USB key (Rubber Ducky [...]), Malwares, server side validation of data...
+DDOS attacks --> CloudFlare can help mitigate some attacks.
+
+2)
+
+Stadium Cameras (wired connection) --> Server in the stadium --> (sending data through Internet connection) Tracab Gateway --> (Websocket connection) server --> (NodeJS + request) Database <-- API --> (request) Users Frontend --> Users
+
+What could go wrong : 
+
+The hardware at the stadium stops working --> No Coverage (example : Wired connection sewered, Cameras broken [...])
+Internet Connection issue at the stadium preventing communication
+Websocket communication not going through (No Identication/ lost identication)
+Error within the API (Endpoints not working, Too much request causing an Overload)
+Power Outage at the stadium
+Third party developers unable to understand the documentation / needing suppport
+
+
+3)
+
+Tools and patterns :
+
+Would probably suggest using :
+
+Docker and Kubernetes --> Containerisation
+Redis and MongoDB --> Database
+Express --> Server
+Axios --> Requests
+socket.io --> Websockets
+
+
+

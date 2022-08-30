@@ -1,0 +1,29 @@
+{
+    "name": "tracab-test",
+    "version": "1.0.0",
+    "description": "Tracab technical case",
+    "main": "findLongestConsecutiveRange.ts",
+    "scripts": {
+        "compile": "npx tsc example.ts",
+        "prettier:check": "npx prettier --check .",
+        "prettier:format": "npx prettier --write .",
+        "start": "npx tsc findLongestConsecutiveRange.ts && node findLongestConsecutiveRange.js",
+        "test": "jest --coverage",
+        "eliminateDuplicates": "node eliminateDuplicates.js",
+        "replaceTextTs": "npx tsc replaceText.ts && node replaceText.js"
+    },
+    "keywords": [
+        "tracab",
+        "technical",
+        "test"
+    ],
+    "author": "Raphael Bier",
+    "license": "MIT",
+    "devDependencies": {
+        "@types/jest": "^28.1.8",
+        "jest": "^28.1.3",
+        "prettier": "2.7.1",
+        "ts-jest": "^28.0.8",
+        "typescript": "^4.8.2"
+    }
+}
